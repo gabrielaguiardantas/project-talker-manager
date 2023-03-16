@@ -61,7 +61,9 @@ async function addNewTalker(newTalker) {
         },
     };
     talkersArray.push(objectTalker);
-    fs.writeFile(path.resolve('./src/talker.json'), JSON.stringify(talkersArray, null, 2));
+    await fs.writeFile(path.resolve(__dirname, './talker.json'), 
+    JSON.stringify(talkersArray, null, 2));
+    return objectTalker;
 }
 
 function validateToken(req, res, next) {
@@ -111,23 +113,28 @@ function validateAge(req, res, next) {
 
 function validateTalkAndWatchedAt(req, res, next) {
     const { talk } = req.body;
+    if (!talk) return res.status(400).send({ message: 'O campo "talk" é obrigatório' }); 
     const { watchedAt } = req.body.talk;
-    if (!talk) {
-        return res.status(400).send({
-        message: 'O campo "talk" é obrigatório',
-         }); 
-    }
-    if (!watchedAt) {
-        return res.status(400).send({
-        message: 'O campo "watchedAt" é obrigatório',
-        }); 
-    }
-    if (Number.isNaN(Date.parse(watchedAt))) {
-        return res.status(400).send({
-        message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"',
-        }); 
-    }
+    if (!watchedAt) return res.status(400).send({ message: 'O campo "watchedAt" é obrigatório' }); 
+    const dateFormat = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!watchedAt.match(dateFormat)) {
+        return res.status(400)
+        .send({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
+    } 
     next();
+}
+
+function validateTalkRate(req, res, next) {
+    const { rate } = req.body.talk;
+    switch (true) {
+        case rate === undefined: return res.status(400).send({
+            message: 'O campo "rate" é obrigatório',
+          });
+        case rate < 1 || rate > 5 || !Number.isInteger(rate): return res.status(400).send({
+            message: 'O campo "rate" deve ser um número inteiro entre 1 e 5',
+        });
+        default: next();
+    }
 }
 
 module.exports = {
@@ -141,4 +148,5 @@ module.exports = {
     validateName,
     validateAge,
     validateTalkAndWatchedAt,
+    validateTalkRate,
 };

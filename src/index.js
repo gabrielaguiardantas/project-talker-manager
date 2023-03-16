@@ -2,7 +2,8 @@ const express = require('express');
 const { readJson, readTalkerById, 
   generateToken, validateEmail, 
   validatePassword, addNewTalker, 
-  validateToken, validateName, validateAge, validateTalkAndWatchedAt } = require('./appUtils');
+  validateToken, validateName, 
+  validateAge, validateTalkAndWatchedAt, validateTalkRate } = require('./appUtils');
 
 const app = express();
 app.use(express.json());
@@ -34,10 +35,9 @@ app.post('/login', validateEmail, validatePassword, (req, res) => {
 });
 // req 5
 app.post('/talker', validateToken, 
-validateName, validateAge, validateTalkAndWatchedAt, async (req, res) => {
+validateName, validateAge, validateTalkAndWatchedAt, validateTalkRate, async (req, res) => {
   const newTalker = req.body;
-  addNewTalker(newTalker);
-  return res.status(201).send(newTalker);
+  return res.status(201).send(await addNewTalker(newTalker));
 });
 
 app.listen(PORT, () => {
