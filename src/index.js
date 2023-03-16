@@ -3,7 +3,8 @@ const { readJson, readTalkerById,
   generateToken, validateEmail, 
   validatePassword, addNewTalker, 
   validateToken, validateName, 
-  validateAge, validateTalkAndWatchedAt, validateTalkRate } = require('./appUtils');
+  validateAge, validateTalkAndWatchedAt, validateTalkRate, validateId, 
+  editTalkerById, deleteTalkerById } = require('./appUtils');
 
 const app = express();
 app.use(express.json());
@@ -38,6 +39,17 @@ app.post('/talker', validateToken,
 validateName, validateAge, validateTalkAndWatchedAt, validateTalkRate, async (req, res) => {
   const newTalker = req.body;
   return res.status(201).send(await addNewTalker(newTalker));
+});
+// req 6
+app.put('/talker/:id', validateId, validateToken, 
+validateName, validateAge, validateTalkAndWatchedAt, validateTalkRate, async (req, res) => {
+  const id = Number(req.params.id);
+  return res.status(200).send(await editTalkerById(id, req));
+});
+// req 7
+app.delete('/talker/:id', validateToken, async (req, res) => {
+  const id = Number(req.params.id);
+  return res.status(204).send(await deleteTalkerById(id));
 });
 
 app.listen(PORT, () => {

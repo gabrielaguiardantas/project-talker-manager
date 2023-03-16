@@ -1,14 +1,16 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+const PATH_NAME = './src/talker.json';
+
 // req 1
 async function readJson() {
-  const talkers = await fs.readFile(path.resolve('./src/talker.json'), 'utf-8');
+  const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
   return JSON.parse(talkers);
 }
 // req 2
 async function readTalkerById(id) {
-    const talkers = await fs.readFile(path.resolve('./src/talker.json'), 'utf-8');
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
     const talkersArray = JSON.parse(talkers);
     return talkersArray.find((talker) => talker.id === id);
 }
@@ -49,7 +51,7 @@ function validatePassword(req, res, next) {
 }
 // req 5
 async function addNewTalker(newTalker) {
-    const talkers = await fs.readFile(path.resolve('./src/talker.json'), 'utf-8');
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
     const talkersArray = JSON.parse(talkers);
     const objectTalker = {
         name: newTalker.name,
@@ -61,7 +63,7 @@ async function addNewTalker(newTalker) {
         },
     };
     talkersArray.push(objectTalker);
-    await fs.writeFile(path.resolve(__dirname, './talker.json'), 
+    await fs.writeFile(path.resolve(PATH_NAME), 
     JSON.stringify(talkersArray, null, 2));
     return objectTalker;
 }
@@ -136,6 +138,38 @@ function validateTalkRate(req, res, next) {
         default: next();
     }
 }
+// req 6
+async function validateId(req, res, next) {
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
+    const talkersArray = JSON.parse(talkers);
+    const id = Number(req.params.id);
+    if (!talkersArray.some((talker) => talker.id === id)) {
+        return res.status(404).send({
+        message: 'Pessoa palestrante não encontrada',
+      });
+    }
+    next();
+}
+
+async function editTalkerById(id, req) {
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
+    const talkersArray = JSON.parse(talkers);
+    const { name, age } = req.body;
+    const { watchedAt, rate } = req.body.talk;
+    const newArray = talkersArray.map((talker) => ((Number(talker.id) === id) 
+    ? { name, age, id: talker.id, talk: { watchedAt, rate } } : talker));
+    await fs.writeFile(path.resolve(PATH_NAME), 
+    JSON.stringify(newArray, null, 2));
+    return newArray[id - 1];
+}
+
+async function deleteTalkerById(id) {
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
+    const talkersArray = JSON.parse(talkers);
+    const newArray = talkersArray.filter((talker) => Number(talker.id) !== id);
+    await fs.writeFile(path.resolve(PATH_NAME), 
+    JSON.stringify(newArray, null, 2));
+}
 
 module.exports = {
     readJson,
@@ -149,4 +183,7 @@ module.exports = {
     validateAge,
     validateTalkAndWatchedAt,
     validateTalkRate,
+    validateId,
+    editTalkerById,
+    deleteTalkerById,
 };
