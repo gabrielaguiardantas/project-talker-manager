@@ -4,7 +4,7 @@ const { readJson, readTalkerById,
   validatePassword, addNewTalker, 
   validateToken, validateName, 
   validateAge, validateTalkAndWatchedAt, validateTalkRate, validateId, 
-  editTalkerById, deleteTalkerById } = require('./appUtils');
+  editTalkerById, deleteTalkerById, findTalkerByTerm, validateQuery } = require('./appUtils');
 
 const app = express();
 app.use(express.json());
@@ -19,6 +19,12 @@ app.get('/', (_request, response) => {
 
 // req 1
 app.get('/talker', async (req, res) => res.status(200).send(await readJson()));
+
+// req 8
+app.get('/talker/search', validateToken, validateQuery, async (req, res) => {
+  const { q } = req.query;
+  return res.status(200).send(await findTalkerByTerm(q));
+});
 
 // req 2
 app.get('/talker/:id', async (req, res) => {

@@ -170,6 +170,22 @@ async function deleteTalkerById(id) {
     await fs.writeFile(path.resolve(PATH_NAME), 
     JSON.stringify(newArray, null, 2));
 }
+async function findTalkerByTerm(q, rate) {
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
+    const talkersArray = JSON.parse(talkers);
+    const newArray = talkersArray.filter((talker) => talker.name.includes(q));
+    if (rate) {
+        const newArray2 = newArray.filter((talker) => talker.talk.rate === rate);
+        return newArray2;
+    }
+    return newArray;
+}
+async function validateQuery(req, res, next) {
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
+    const talkersArray = JSON.parse(talkers);
+    if (!req.query.q || req.query.q === {}) return res.status(200).send(talkersArray);
+    next();
+}
 
 module.exports = {
     readJson,
@@ -186,4 +202,6 @@ module.exports = {
     validateId,
     editTalkerById,
     deleteTalkerById,
+    findTalkerByTerm,
+    validateQuery,
 };
