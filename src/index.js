@@ -6,7 +6,9 @@ const { readJson, readTalkerById,
   validateAge, validateTalkAndWatchedAt, validateTalkRate, validateId, 
   editTalkerById, deleteTalkerById, 
   findTalkerByTerm, findTalkerByRate, 
-  validateQueryRate } = require('./appUtils');
+  validateQueryRate, 
+  validateQueryDate, 
+  findByDate } = require('./appUtils');
 
 const app = express();
 app.use(express.json());
@@ -23,11 +25,15 @@ app.get('/', (_request, response) => {
 app.get('/talker', async (req, res) => res.status(200).send(await readJson()));
 
 // req 8
-app.get('/talker/search', validateToken, validateQueryRate, async (req, res) => {
-  const { q, rate } = req.query;
+app.get('/talker/search', validateToken, validateQueryRate, validateQueryDate, async (req, res) => {
+  const { q, rate, date } = req.query;
   console.log(q, rate);
-  if (!q) return res.status(200).send(findTalkerByRate(await readJson(), rate));
-  return res.status(200).send(findTalkerByRate(await findTalkerByTerm(q), rate));
+  if (!date) {
+    if (!q) return res.status(200).send(findTalkerByRate(await readJson(), rate));
+    return res.status(200).send(findTalkerByRate(await findTalkerByTerm(q), rate));
+  }
+  if (!q) return res.status(200).send(findByDate(findTalkerByRate(await readJson(), rate), date));
+  return res.status(200).send(findByDate(findTalkerByRate(await findTalkerByTerm(q), rate), date));
 });
 
 // req 2
