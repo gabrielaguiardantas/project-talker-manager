@@ -67,7 +67,6 @@ async function addNewTalker(newTalker) {
     JSON.stringify(talkersArray, null, 2));
     return objectTalker;
 }
-
 function validateToken(req, res, next) {
     const token = req.header('authorization');
     if (!token) {
@@ -82,7 +81,6 @@ function validateToken(req, res, next) {
     }
     next();
 }
-
 function validateName(req, res, next) {
     const { name } = req.body;
     if (!name) {
@@ -97,7 +95,6 @@ function validateName(req, res, next) {
     }
     next();
 }
-
 function validateAge(req, res, next) {
     const { age } = req.body;
     if (!age) {
@@ -112,7 +109,6 @@ function validateAge(req, res, next) {
     }
     next();
 }
-
 function validateTalkAndWatchedAt(req, res, next) {
     const { talk } = req.body;
     if (!talk) return res.status(400).send({ message: 'O campo "talk" é obrigatório' }); 
@@ -125,7 +121,6 @@ function validateTalkAndWatchedAt(req, res, next) {
     } 
     next();
 }
-
 function validateTalkRate(req, res, next) {
     const { rate } = req.body.talk;
     switch (true) {
@@ -150,7 +145,6 @@ async function validateId(req, res, next) {
     }
     next();
 }
-
 async function editTalkerById(id, req) {
     const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
     const talkersArray = JSON.parse(talkers);
@@ -162,7 +156,6 @@ async function editTalkerById(id, req) {
     JSON.stringify(newArray, null, 2));
     return newArray[id - 1];
 }
-
 async function deleteTalkerById(id) {
     const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
     const talkersArray = JSON.parse(talkers);
@@ -170,12 +163,14 @@ async function deleteTalkerById(id) {
     await fs.writeFile(path.resolve(PATH_NAME), 
     JSON.stringify(newArray, null, 2));
 }
+// req 8
 async function findTalkerByTerm(q) {
     const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
     const talkersArray = JSON.parse(talkers);
     const newArray = talkersArray.filter((talker) => talker.name.includes(q));
     return newArray;
 }
+// req 9
 function findTalkerByRate(arrayFilteredByTerm, rate) {
     if (!rate) return arrayFilteredByTerm;
     const newArray = arrayFilteredByTerm
@@ -192,6 +187,7 @@ async function validateQueryRate(req, res, next) {
     }
     next();
 }
+// req 10
 async function validateQueryDate(req, res, next) {
     const { date } = req.query;
     const dateFormat = /^\d{2}\/\d{2}\/\d{4}$/;
@@ -205,6 +201,27 @@ async function validateQueryDate(req, res, next) {
 function findByDate(arrayFilteredByTerm, date) {
     const newArray = arrayFilteredByTerm.filter((talker) => talker.talk.watchedAt === date);
     return newArray;
+}
+// req 11
+async function editTalkerRateById(id, rateToEdit) {
+    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
+    const talkersArray = JSON.parse(talkers);
+    const newArray = talkersArray.map((talker) => ((Number(talker.id) === id) 
+    ? { ...talker, talk: { ...talker.talk, rate: rateToEdit } } : talker));
+    await fs.writeFile(path.resolve(PATH_NAME), 
+    JSON.stringify(newArray, null, 2));
+}
+function validateRate(req, res, next) {
+    const { rate } = req.body;
+    switch (true) {
+        case rate === undefined: return res.status(400).send({
+            message: 'O campo "rate" é obrigatório',
+          });
+        case rate < 1 || rate > 5 || !Number.isInteger(rate): return res.status(400).send({
+            message: 'O campo "rate" deve ser um número inteiro entre 1 e 5',
+        });
+        default: next();
+    }
 }
 
 module.exports = {
@@ -227,4 +244,6 @@ module.exports = {
     validateQueryRate,
     validateQueryDate,
     findByDate,
+    editTalkerRateById,
+    validateRate,
 };

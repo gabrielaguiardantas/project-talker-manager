@@ -8,7 +8,9 @@ const { readJson, readTalkerById,
   findTalkerByTerm, findTalkerByRate, 
   validateQueryRate, 
   validateQueryDate, 
-  findByDate } = require('./appUtils');
+  findByDate, 
+  editTalkerRateById, 
+  validateRate } = require('./appUtils');
 
 const app = express();
 app.use(express.json());
@@ -24,7 +26,7 @@ app.get('/', (_request, response) => {
 // req 1
 app.get('/talker', async (req, res) => res.status(200).send(await readJson()));
 
-// req 8
+// req 8, 9 e 10
 app.get('/talker/search', validateToken, validateQueryRate, validateQueryDate, async (req, res) => {
   const { q, rate, date } = req.query;
   console.log(q, rate);
@@ -66,6 +68,12 @@ validateName, validateAge, validateTalkAndWatchedAt, validateTalkRate, async (re
 app.delete('/talker/:id', validateToken, async (req, res) => {
   const id = Number(req.params.id);
   return res.status(204).send(await deleteTalkerById(id));
+});
+// req 11
+app.patch('/talker/rate/:id', validateToken, validateRate, async (req, res) => {
+  const id = Number(req.params.id);
+  const rateToEdit = req.body.rate;
+  return res.status(204).send(await editTalkerRateById(id, rateToEdit));
 });
 
 app.listen(PORT, () => {
