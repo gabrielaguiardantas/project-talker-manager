@@ -170,20 +170,32 @@ async function deleteTalkerById(id) {
     await fs.writeFile(path.resolve(PATH_NAME), 
     JSON.stringify(newArray, null, 2));
 }
-async function findTalkerByTerm(q, rate) {
+async function findTalkerByTerm(q) {
     const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
     const talkersArray = JSON.parse(talkers);
     const newArray = talkersArray.filter((talker) => talker.name.includes(q));
-    if (rate) {
-        const newArray2 = newArray.filter((talker) => talker.talk.rate === rate);
-        return newArray2;
-    }
     return newArray;
 }
-async function validateQuery(req, res, next) {
+function findTalkerByRate(arrayFilteredByTerm, rate) {
+    if (!rate) return arrayFilteredByTerm;
+    const newArray = arrayFilteredByTerm
+    .filter((talker) => Number(talker.talk.rate) === Number(rate));
+    return newArray;
+}
+async function validateQueryTerm(req, res, next) {
     const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
     const talkersArray = JSON.parse(talkers);
-    if (!req.query.q || req.query.q === {}) return res.status(200).send(talkersArray);
+    if (!req.query.q) return res.status(200).send(talkersArray);
+    next();
+}
+async function validateQueryRate(req, res, next) {
+    let { rate } = req.query;
+    if (rate === undefined) return next();
+    rate = Number(rate);
+    if (rate < 1 || rate > 5 || !Number.isInteger(rate)) {
+        return res
+        .status(400).send({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' }); 
+    }
     next();
 }
 
@@ -203,5 +215,7 @@ module.exports = {
     editTalkerById,
     deleteTalkerById,
     findTalkerByTerm,
-    validateQuery,
+    validateQueryTerm,
+    findTalkerByRate,
+    validateQueryRate,
 };
