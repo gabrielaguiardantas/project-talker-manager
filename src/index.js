@@ -6,7 +6,7 @@ const { readJson, readTalkerById,
   validateAge, validateTalkAndWatchedAt, validateTalkRate, validateId, 
   editTalkerById, deleteTalkerById, 
   findTalkerByTerm, findTalkerByRate, 
-  validateQueryTerm, validateQueryRate } = require('./appUtils');
+  validateQueryRate } = require('./appUtils');
 
 const app = express();
 app.use(express.json());
