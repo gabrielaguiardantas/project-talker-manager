@@ -13,6 +13,9 @@ const { readJson, readTalkerById,
   validateRate } = require('./appUtils');
 
 const app = express();
+const connection = require('./db/connection');
+const { findAll } = require('./db/tasksDB');
+
 app.use(express.json());
 
 const HTTP_OK_STATUS = 200;
@@ -25,6 +28,17 @@ app.get('/', (_request, response) => {
 
 // req 1
 app.get('/talker', async (req, res) => res.status(200).send(await readJson()));
+
+// req 12
+app.get('/talker/db', async (req, res) => {
+  const [result] = await findAll();
+  const reestructuredArray = result.map((talker) => (
+    { name: talker.name, 
+      age: talker.age, 
+      id: talker.id, 
+      talk: { watchedAt: talker.talk_watched_at, rate: talker.talk_rate } }));
+  return res.status(200).json(reestructuredArray);
+});
 
 // req 8, 9 e 10
 app.get('/talker/search', validateToken, validateQueryRate, validateQueryDate, async (req, res) => {
@@ -76,6 +90,11 @@ app.patch('/talker/rate/:id', validateToken, validateRate, async (req, res) => {
   return res.status(204).send(await editTalkerRateById(id, rateToEdit));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log('Online');
+
+  const [result] = await connection.execute('SELECT 1');
+  if (result) {
+  console.log('MySQL connection OK');
+}
 });
