@@ -182,12 +182,6 @@ function findTalkerByRate(arrayFilteredByTerm, rate) {
     .filter((talker) => Number(talker.talk.rate) === Number(rate));
     return newArray;
 }
-async function validateQueryTerm(req, res, next) {
-    const talkers = await fs.readFile(path.resolve(PATH_NAME), 'utf-8');
-    const talkersArray = JSON.parse(talkers);
-    if (!req.query.q) return res.status(200).send(talkersArray);
-    next();
-}
 async function validateQueryRate(req, res, next) {
     let { rate } = req.query;
     if (rate === undefined) return next();
@@ -215,7 +209,6 @@ module.exports = {
     editTalkerById,
     deleteTalkerById,
     findTalkerByTerm,
-    validateQueryTerm,
     findTalkerByRate,
     validateQueryRate,
 };
