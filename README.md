@@ -1,4 +1,4 @@
-## Projeto Talker Manager ##
+# Projeto Talker Manager #
 
 Vigésimo projeto do curso de desenvolvimento Web da Trybe e quarto projeto do módulo de BackEnd. Desenvolvi uma aplicação de cadastro de palestrantes com CRUD ( Create, Read, Update e Delete). Principais conhecimentos desenvolvidos e aperfeiçoados neste projeto:
 
@@ -9,7 +9,7 @@ Vigésimo projeto do curso de desenvolvimento Web da Trybe e quarto projeto do m
 - Middlewares
 - Tratamento de erros no BackEnd
 
-# Demonstração: #
+## Demonstração: ##
 
-# Features implementadas: #
+## Features implementadas: ##
 
